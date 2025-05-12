@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { api } from "../../api";
 
-const Popup = ({ setShowPopUp, onAddProduct }) => {
+const Popup = ({ setShowPopUp, onAddProduct, setReload }) => {
   const [formData, setFormData] = useState({
     name: "",
     price: "",
     description: "",
     image: "",
-    category: "",
+    categoryId: "",
   });
 
   const handleChange = (e) => {
@@ -17,21 +17,22 @@ const Popup = ({ setShowPopUp, onAddProduct }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const newProducts = {
+    const newProduct = {
       name: formData.name,
       price: Number(formData.price),
       description: formData.description,
-      image: formData.image,
-      category: formData.category,
+      img: formData.image,
+      categoryId: Number(formData.categoryId),
     };
 
-    api
-      .post("/products", newProducts)
-      .then((res) => {
-        onAddProduct(newProducts);
-        setShowPopUp(false);
-      })
-      .catch((err) => console.log(err));
+    try {
+      const response = await api.post("/products", newProduct);
+      setReload((p) => !p);
+      onAddProduct(response.data);
+      setShowPopUp(false);
+    } catch (error) {
+      console.log(error.message);
+    }
   };
 
   return (
@@ -101,18 +102,15 @@ const Popup = ({ setShowPopUp, onAddProduct }) => {
                 htmlFor="category">
                 <span>Category</span>
               </label>
-              <select
-                name="category"
+              <input
+                name="categoryId"
                 id="category"
-                type="text"
-                value={formData.category}
+                type="number"
+                value={formData.categoryId}
                 onChange={handleChange}
-                className="h-[40px] bg-[#374151] rounded-[5px] border-[1px] border-[#4b5563] indent-2.5 mt-2.5 text-[16px] font-[Inter] focus:outline-2 focus:outline-[dodgerblue] focus:border-none text-white">
-                <option value="volvo">Volvo</option>
-                <option value="saab">Saab</option>
-                <option value="mercedes">Mercedes</option>
-                <option value="audi">Audi</option>
-              </select>
+                placeholder="Category"
+                className="h-[40px] bg-[#374151] rounded-[5px] border-[1px] border-[#4b5563] indent-2.5 mt-2.5 text-[16px] font-[Inter] focus:outline-2 focus:outline-[dodgerblue] focus:border-none text-white"
+              />
             </div>
 
             <div className="w-1/2 flex flex-col">
